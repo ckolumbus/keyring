@@ -125,3 +125,21 @@ func TestWinCredKeysWhenEmpty(t *testing.T) {
 		t.Fatalf("Expected 0 keys, got %d", len(keys))
 	}
 }
+
+func TestWinCredKeysWhenNonEmptyPrefix(t *testing.T) {
+	kr, err := keyring.Open(keyring.Config{
+		AllowedBackends: []keyring.BackendType{keyring.WinCredBackend},
+		WinCredPrefix: "testprefix",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	keys, err := kr.Keys()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(keys) != 0 {
+		t.Fatalf("Expected 0 keys, got %d", len(keys))
+	}
+}

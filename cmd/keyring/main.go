@@ -18,10 +18,14 @@ func main() {
 
 	// actions to take
 	actionListKeys := flag.Bool("list-keys", false, "Whether to list keys")
+	actionDeleteKey := flag.Bool("delete", false, "Delete given key")
 	actionSetValue := flag.String("set", "", "The value to set")
 
 	// keychain
 	keychainName := flag.String("keychain", "login", "The keychain to search")
+
+	// global prefix
+	prefix := flag.String("prefix", "", "Prefix to prepend to service / key (where supported)")
 
 	flag.Parse()
 
@@ -52,6 +56,8 @@ func main() {
 		ServiceName:     *serviceName,
 		AllowedBackends: allowedBackends,
 		KeychainName:    *keychainName,
+		WinCredPrefix:   *prefix,
+		PassPrefix:      *prefix,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -60,8 +66,8 @@ func main() {
 	switch {
 	case *actionListKeys:
 		if *debug {
-			log.Printf("Listing keys in service %q in backend %q",
-				*serviceName, allowedBackends[0])
+			log.Printf("Listing keys in service %q with prefix %q in backend %q",
+				*serviceName, *prefix, allowedBackends[0])
 		}
 		keys, err := ring.Keys()
 		if err != nil {
@@ -73,8 +79,8 @@ func main() {
 
 	case *actionSetValue != "":
 		if *debug {
-			log.Printf("Setting key %q in service %q in backend %q",
-				*keyName, *serviceName, allowedBackends[0])
+			log.Printf("Setting key %q in service %q with prefix %q in backend %q",
+				*keyName, *serviceName, *prefix, allowedBackends[0])
 		}
 		err := ring.Set(keyring.Item{
 			Key:  *keyName,
@@ -84,10 +90,20 @@ func main() {
 			log.Fatal(err)
 		}
 
+	case *actionDeleteKey:
+		if *debug {
+			log.Printf("Deleting key %q in service %q with prefix %q in backend %q",
+				*keyName, *serviceName, *prefix, allowedBackends[0])
+		}
+		err := ring.Remove(*keyName)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	default:
 		if *debug {
-			log.Printf("Getting key %q in service %q in backend %q",
-				*keyName, *serviceName, allowedBackends[0])
+			log.Printf("Getting key %q in service %q with prefix %q in backend %q",
+				*keyName, *serviceName, *prefix, allowedBackends[0])
 		}
 
 		i, err := ring.Get(*keyName)
