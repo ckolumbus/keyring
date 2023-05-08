@@ -26,9 +26,9 @@ func init() {
 		}
 
 		prefix := cfg.WinCredPrefix
-		if prefix == "" {
-			prefix = "keyring"
-		}
+		//if prefix == "" {
+		//	prefix = "keyring"
+		//}
 
 		return &windowsKeyring{
 			name:   name,
@@ -94,5 +94,9 @@ func (k *windowsKeyring) Keys() ([]string, error) {
 }
 
 func (k *windowsKeyring) credentialName(key string) string {
-	return k.prefix + ":" + k.name + ":" + key
+	prefix := ""
+	if len(k.prefix) > 0 {
+		prefix = k.prefix + ":"
+	}
+	return prefix + k.name + ":" + key
 }
